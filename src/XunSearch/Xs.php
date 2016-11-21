@@ -4,15 +4,15 @@ namespace Xlstudio\XunSearch\XunSearch;
 
 /**
  * Class Xs
- * Rewrite class XS
+ * Rewrite class XS.
  *
  * @author davin.bao
- * @package Xlstudio\XunSearch\XunSearch
  */
 class Xs extends \XS
 {
     /**
-     * Init by laravel Config
+     * Init by laravel Config.
+     *
      * @param $config see demo.ini file
      */
     public function __construct($config)
@@ -29,14 +29,12 @@ class Xs extends \XS
 
         $this->_scheme = $this->_bindScheme = $scheme;
         $this->setScheme($scheme);
-
     }
 
     public function getSearch()
     {
-
         if ($this->_search === null) {
-            $conns = array();
+            $conns = [];
             if (!isset($this->_config['server.search'])) {
                 $conns[] = 8384;
             } else {
@@ -54,6 +52,7 @@ class Xs extends \XS
                 try {
                     $this->_search = new XsSearch($conns[$i], $this);
                     $this->_search->setCharset($this->getDefaultCharset());
+
                     return $this->_search;
                 } catch (XSException $e) {
                     if (($i + 1) === count($conns)) {
@@ -62,6 +61,7 @@ class Xs extends \XS
                 }
             }
         }
+
         return $this->_search;
     }
 }

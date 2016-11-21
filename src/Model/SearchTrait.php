@@ -5,17 +5,18 @@ namespace Xlstudio\XunSearch\Model;
 use App;
 
 /**
- * Trait SearchTrait
+ * Trait SearchTrait.
  *
  * @author davin.bao
- * @package Xlstudio\XunSearch\Model
  */
 trait SearchTrait
 {
-    public static function getSearch(){
+    public static function getSearch()
+    {
         /** @var Search $search */
         $search = App::make('search');
-        return $search->search()->model(new self);
+
+        return $search->search()->model(new self());
     }
 
     /**
@@ -35,5 +36,4 @@ trait SearchTrait
             }
         );
     }
-
 }

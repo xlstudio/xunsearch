@@ -9,13 +9,11 @@ use Illuminate\Database\Eloquent\Model;
  * Class Config
  *
  * @author davin.bao
- * @package Xlstudio\XunSearch\Model
  */
 class Config
 {
-
     /**
-     * Search field Name enum
+     * Search field Name enum.
      */
     const FIELD_LABEL_DEFAULT_CLASS_ID = 'class_uid';
 
@@ -24,7 +22,7 @@ class Config
     const FIELD_LABEL_DEFAULT_DB_PK = 'id';
 
     /**
-     * Search field Type enum
+     * Search field Type enum.
      */
     const FIELD_TYPE_TIMESTAMP = 'timestamp';
 
@@ -47,8 +45,9 @@ class Config
     /**
      * Create configuration for models.
      *
-     * @param array $configuration
+     * @param array   $configuration
      * @param Factory $modelFactory
+     *
      * @throws \InvalidArgumentException
      */
     public function __construct(array $configuration, Factory $modelFactory)
@@ -60,7 +59,6 @@ class Config
         $this->modelFactory = $modelFactory;
 
         foreach ($configuration as $className => $options) {
-
             $fields = array_get($options, 'fields', []);
 
             if (count($fields) == 0) {
@@ -73,10 +71,10 @@ class Config
             $classUid = $modelFactory->classUid($className);
 
             $this->configuration[] = [
-                'repository' => $modelRepository,
-                'class_uid' => $classUid,
-                'fields' => $fields,
-                'primary_key' => array_get($options, 'primary_key', self::FIELD_LABEL_DEFAULT_DB_PK)
+                'repository'  => $modelRepository,
+                'class_uid'   => $classUid,
+                'fields'      => $fields,
+                'primary_key' => array_get($options, 'primary_key', self::FIELD_LABEL_DEFAULT_DB_PK),
             ];
         }
     }
@@ -85,8 +83,10 @@ class Config
      * Get configuration for model.
      *
      * @param Model $model
-     * @return array
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return array
      */
     private function config(Model $model)
     {
@@ -99,7 +99,7 @@ class Config
         }
 
         throw new \InvalidArgumentException(
-            "Configuration doesn't exist for model of class '" . get_class($model) . "'."
+            "Configuration doesn't exist for model of class '".get_class($model)."'."
         );
     }
 
@@ -107,8 +107,10 @@ class Config
      * Create instance of model by class UID.
      *
      * @param $classUid
-     * @return Model
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return Model
      */
     private function newInstanceBy($classUid)
     {
@@ -135,6 +137,7 @@ class Config
         foreach ($this->configuration as $config) {
             $repositories[] = $config['repository'];
         }
+
         return $repositories;
     }
 
@@ -142,11 +145,13 @@ class Config
      * Get 'key-value' pair for private key of model.
      *
      * @param Model $model
+     *
      * @return array
      */
     public function primaryKeyPair(Model $model)
     {
         $c = $this->config($model);
+
         return [self::FIELD_LABEL_DEFAULT_SEARCH_PK, $model->{$c['primary_key']}];
     }
 
@@ -154,11 +159,13 @@ class Config
      * Get 'key-value' pair for UID of model class.
      *
      * @param Model $model
+     *
      * @return array
      */
     public function classUidPair(Model $model)
     {
         $c = $this->config($model);
+
         return [self::FIELD_LABEL_DEFAULT_CLASS_ID, $c['class_uid']];
     }
 
@@ -166,6 +173,7 @@ class Config
      * Get model fields for indexing.
      *
      * @param Model $model
+     *
      * @return array
      */
     public function fields(Model $model)
@@ -182,11 +190,14 @@ class Config
 
     /**
      * 根据字段类型转换数据库中的字段的值
+     *
      * @param $field
+     *
      * @return int
      */
-    public function getSearchFieldValue($field){
-        switch($field['type']){
+    public function getSearchFieldValue($field)
+    {
+        switch ($field['type']) {
             case self::FIELD_TYPE_TIMESTAMP:
                 return strtotime($field['value']);
             case self::FIELD_TYPE_STRING:
@@ -197,16 +208,19 @@ class Config
 
     /**
      * 根据字段类型转换索引服务中的字段的值
+     *
      * @param $field
      * @param string $format
+     *
      * @return bool|string
      */
-    public function getShowFieldValue($field, $format = 'Y-m-d H:i:s'){
-        switch($field['type']){
+    public function getShowFieldValue($field, $format = 'Y-m-d H:i:s')
+    {
+        switch ($field['type']) {
             case self::FIELD_TYPE_TIMESTAMP:
                 return date($format, $field['value']);
         }
+
         return $field['value'];
     }
-
 }

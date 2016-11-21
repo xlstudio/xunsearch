@@ -6,30 +6,30 @@ use App;
 
 /**
  * Class XsSearch
- * Rewrite class XSSearch
+ * Rewrite class XSSearch.
  *
  * @author davin.bao
- * @package Xlstudio\XunSearch\XunSearch
  */
 class XsSearch extends \XSSearch
 {
-
-    public function model($model){
-
+    public function model($model)
+    {
         $search = App::make('search');
         list($uidName, $uidValue) = $search->config()->classUidPair($model);
-        $this->addQuery($uidName . ':' . $uidValue);
+        $this->addQuery($uidName.':'.$uidValue);
 
         return $this;
     }
 
-    public function addQuery($query, $addOp=0, $scale=1){
+    public function addQuery($query, $addOp = 0, $scale = 1)
+    {
         $this->addQueryString($query, $addOp, $scale);
+
         return $this;
     }
 
-    public function getIDList($query = null, $saveHighlight = true){
-
+    public function getIDList($query = null, $saveHighlight = true)
+    {
         $result = $this->search($query, $saveHighlight);
 
         $array = [];

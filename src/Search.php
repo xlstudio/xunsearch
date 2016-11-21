@@ -2,17 +2,15 @@
 
 namespace Xlstudio\XunSearch;
 
-use App;
 use Illuminate\Database\Eloquent\Model;
 use Xlstudio\XunSearch\Model\Config as ModelsConfig;
 use Xlstudio\XunSearch\XunSearch\Xs as XunSearch;
 
 /**
  * Class Search
- * Main search class
+ * Main search class.
  *
  * @author Xiphin
- * @package Xlstudio\XunSearch
  */
 class Search
 {
@@ -37,10 +35,12 @@ class Search
     }
 
     /**
-     * Get new document instance
+     * Get new document instance.
+     *
      * @return \XSDocument
      */
-    public function getDocumentInstance(){
+    public function getDocumentInstance()
+    {
         return new \XSDocument();
     }
 
@@ -67,7 +67,7 @@ class Search
     public function __construct($config, ModelsConfig $modelsConfig)
     {
         $this->xs = new XunSearch($config);
-        $this->config =  $modelsConfig;
+        $this->config = $modelsConfig;
     }
 
     /**
@@ -85,6 +85,7 @@ class Search
      *
      * @param $name
      * @param $arguments
+     *
      * @return mixed
      */
     public function __call($name, $arguments)
@@ -93,7 +94,7 @@ class Search
     }
 
     /**
-     * Update document in index for model
+     * Update document in index for model.
      *
      * @param Model $model
      */
@@ -114,7 +115,7 @@ class Search
         list($pkName, $pkValue) = $this->config->primaryKeyPair($model);
 
         // Add primary key.
-        $doc->setField($pkName, $uidValue . '_' . $pkValue);
+        $doc->setField($pkName, $uidValue.'_'.$pkValue);
 
         //Add id key
         $doc->setField(ModelsConfig::FIELD_LABEL_DEFAULT_DB_PK, $pkValue);
@@ -145,6 +146,6 @@ class Search
     {
         list($uidName, $uidValue) = $this->config->classUidPair($model);
         list($pkName, $pkValue) = $this->config->primaryKeyPair($model);
-        $this->index()->del($uidValue . '_' . $pkValue); // delete document from index by ID of hit.
+        $this->index()->del($uidValue.'_'.$pkValue); // delete document from index by ID of hit.
     }
 }

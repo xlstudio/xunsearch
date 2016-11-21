@@ -2,8 +2,8 @@
 
 namespace Xlstudio\XunSearch;
 
-use Xlstudio\XunSearch\Model\Config as ModelsConfig;
 use Config;
+use Xlstudio\XunSearch\Model\Config as ModelsConfig;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -13,15 +13,16 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      * @var bool
      */
     protected $defer = false;
+
     public function boot()
     {
         $this->mergeConfigFrom(__DIR__.'/config/xunsearch.php', config_path('xunsearch'));
     }
+
     public function register()
     {
-
         $this->publishes([
-            __DIR__ . '/config/xunsearch.php' => config_path('xunsearch.php'),
+            __DIR__.'/config/xunsearch.php' => config_path('xunsearch.php'),
         ]);
 
         $this->app->singleton('xunsearch.project', function () {
@@ -45,13 +46,13 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
 
         $this->app->singleton('command.search.rebuild', function () {
-            return new Console\RebuildCommand;
+            return new Console\RebuildCommand();
         });
 
         $this->app->singleton('command.search.clear', function () {
-            return new Console\ClearCommand;
+            return new Console\ClearCommand();
         });
 
-        $this->commands(array('command.search.rebuild', 'command.search.clear'));
+        $this->commands(['command.search.rebuild', 'command.search.clear']);
     }
 }

@@ -5,17 +5,18 @@ namespace Xlstudio\XunSearch\Model;
 use App;
 
 /**
- * Class Factory
+ * Class Factory.
  *
  * @author davin.bao
- * @package Xlstudio\XunSearch\Model
  */
 class Factory
 {
     /**
      * @param $className
-     * @return \Illuminate\Database\Eloquent\Model
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return \Illuminate\Database\Eloquent\Model
      */
     public function newInstance($className)
     {
@@ -34,8 +35,10 @@ class Factory
      * Get class UID for object/class.
      *
      * @param $obj
-     * @return string
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return string
      */
     public function classUid($obj)
     {

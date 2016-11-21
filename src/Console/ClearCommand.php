@@ -8,9 +8,9 @@ use Symfony\Component\Console\Output\NullOutput;
 
 /**
  * Class ClearCommand
- * clear all search index
+ * clear all search index.
+ *
  * @author davin.bao
- * @package Xlstudio\XunSearch\Console
  */
 class ClearCommand extends Command
 {
@@ -20,7 +20,7 @@ class ClearCommand extends Command
     public function fire()
     {
         if (!$this->option('verbose')) {
-            $this->output = new NullOutput;
+            $this->output = new NullOutput();
         }
 
         /** @var Search $search */
@@ -30,6 +30,5 @@ class ClearCommand extends Command
         $search->index()->clean();
 
         $this->info('Search index is cleared.');
-
     }
 }

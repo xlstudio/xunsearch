@@ -1,26 +1,29 @@
 #!/usr/bin/env php
 <?php
 /**
- * Xunsearch PHP-SDK 搜索测试工具
+ * Xunsearch PHP-SDK 搜索测试工具.
  *
  * @author hightman
+ *
  * @link http://www.xunsearch.com/
+ *
  * @copyright Copyright &copy; 2011 HangZhou YunSheng Network Technology Co., Ltd.
  * @license http://www.xunsearch.com/license/
+ *
  * @version $Id$
  */
-$lib_file = dirname(__FILE__) . '/../lib/XS.php';
+$lib_file = dirname(__FILE__).'/../lib/XS.php';
 if (!file_exists($lib_file)) {
-	$lib_file = dirname(__FILE__) . '/../lib/XS.class.php';
+    $lib_file = dirname(__FILE__).'/../lib/XS.class.php';
 }
 require_once $lib_file;
-require_once dirname(__FILE__) . '/XSUtil.class.php';
+require_once dirname(__FILE__).'/XSUtil.class.php';
 
 // check arguments
-XSUtil::parseOpt(array('p', 'q', 'c', 'd', 's',
-	'project', 'query', 'db', 'limit', 'charset',
-	'sort', 'add-weight', 'scws-multi', 'cut-off',
-));
+XSUtil::parseOpt(['p', 'q', 'c', 'd', 's',
+    'project', 'query', 'db', 'limit', 'charset',
+    'sort', 'add-weight', 'scws-multi', 'cut-off',
+]);
 $project = XSUtil::getOpt('p', 'project', true);
 $query = XSUtil::getOpt('q', 'query', true);
 $hot = XSUtil::getOpt(null, 'hot');
@@ -40,9 +43,9 @@ $query = XSUtil::convertIn($query);
 $sort = XSUtil::getOpt('s', 'sort');
 
 if (XSUtil::getOpt('h', 'help') !== null || !is_string($project)
-	|| (!$info && !$hot && !$synonyms && !is_string($query))) {
-	$version = XS_PACKAGE_NAME . '/' . XS_PACKAGE_VERSION;
-	echo <<<EOF
+    || (!$info && !$hot && !$synonyms && !is_string($query))) {
+    $version = XS_PACKAGE_NAME.'/'.XS_PACKAGE_VERSION;
+    echo <<<EOF
 Quest - 搜索查询和测试工具 ($version)
 
 用法
@@ -91,300 +94,301 @@ Quest - 搜索查询和测试工具 ($version)
     {$_SERVER['argv'][0]} --hot <project>
 
 EOF;
-	exit(0);
+    exit(0);
 }
 
 // create xs project
 $ini = XSUtil::toProjectIni($project);
 if (!file_exists($ini)) {
-	echo "错误：无效的项目名称 ($project)，不存在相应的配置文件。\n";
-	exit(-1);
+    echo "错误：无效的项目名称 ($project)，不存在相应的配置文件。\n";
+    exit(-1);
 }
 
 // execute the search
 try {
-	// params
-	$params = array('hot', 'suggest', 'correct', 'related', 'output', 'limit');
-	foreach ($params as $_) {
-		$$_ = XSUtil::getOpt(null, $_);
-	}
-	$limit1 = $limit === null ? 10 : intval($limit);
-	$db = XSUtil::getOpt('d', 'db');
+    // params
+    $params = ['hot', 'suggest', 'correct', 'related', 'output', 'limit'];
+    foreach ($params as $_) {
+        $$_ = XSUtil::getOpt(null, $_);
+    }
+    $limit1 = $limit === null ? 10 : intval($limit);
+    $db = XSUtil::getOpt('d', 'db');
 
-	// create xs object
-	$xs = new XS($ini);
-	$search = $xs->search;
-	$search->setCharset('UTF-8');
-	if ($db !== null) {
-		$dbs = explode(',', $db);
-		$search->setDb(trim($dbs[0]));
-		for ($i = 1; $i < count($dbs); $i++) {
-			$search->addDb(trim($dbs[$i]));
-		}
-	}
-	if ($scws_multi !== null) {
-		$search->setScwsMulti($scws_multi);
-	}
+    // create xs object
+    $xs = new XS($ini);
+    $search = $xs->search;
+    $search->setCharset('UTF-8');
+    if ($db !== null) {
+        $dbs = explode(',', $db);
+        $search->setDb(trim($dbs[0]));
+        for ($i = 1; $i < count($dbs); $i++) {
+            $search->addDb(trim($dbs[$i]));
+        }
+    }
+    if ($scws_multi !== null) {
+        $search->setScwsMulti($scws_multi);
+    }
 
-	if ($hot !== null) {
-		$type = $hot === 'cur' ? 'currnum' : ($hot === 'last' ? 'lastnum' : 'total');
-		$result = $search->getHotQuery($limit1, $type);
-		if (count($result) === 0) {
-			echo "暂无相关热门搜索记录。\n";
-		} else {
-			$i = 1;
-			printf("序  %s %s\n%s\n", XSUtil::fixWidth('搜索关键词(' . $type . ')', 40), XSUtil::fixWidth('次数', 10), XSUtil::fixWidth('', 56, '-'));
-			foreach ($result as $word => $freq) {
-				printf("%2d. %s %d\n", $i, XSUtil::fixWidth($word, 40), $freq);
-				$i++;
-			}
-		}
-	} elseif ($info !== null) {
-		// server info
-		echo "---------- SERVER INFO BEGIN ----------\n";
-		$res = $search->execCommand(XS_CMD_DEBUG);
-		echo $res->buf;
-		echo "\n---------- SERVER INFO END ----------\n";
-		// thread pool
-		$res = $search->execCommand(XS_CMD_SEARCH_DRAW_TPOOL);
-		echo $res->buf;
-	} elseif (is_string($synonyms) && $synonyms !== 'stemmed') {
-		echo "列出\033[7m" . $synonyms . "\033[m的同义词：\n";
-		$synonyms = $search->getSynonyms($synonyms);
-		print_r($synonyms);
-	} elseif ($synonyms !== null) {
-		// list all 
-		if ($limit === null) {
-			$offset = $limit1 = 0;
-		} elseif (($pos = strpos($limit, ',')) === false) {
-			$offset = 0;
-		} else {
-			$limit1 = intval(substr($limit, $pos + 1));
-			$offset = intval($limit);
-		}
+    if ($hot !== null) {
+        $type = $hot === 'cur' ? 'currnum' : ($hot === 'last' ? 'lastnum' : 'total');
+        $result = $search->getHotQuery($limit1, $type);
+        if (count($result) === 0) {
+            echo "暂无相关热门搜索记录。\n";
+        } else {
+            $i = 1;
+            printf("序  %s %s\n%s\n", XSUtil::fixWidth('搜索关键词('.$type.')', 40), XSUtil::fixWidth('次数', 10), XSUtil::fixWidth('', 56, '-'));
+            foreach ($result as $word => $freq) {
+                printf("%2d. %s %d\n", $i, XSUtil::fixWidth($word, 40), $freq);
+                $i++;
+            }
+        }
+    } elseif ($info !== null) {
+        // server info
+        echo "---------- SERVER INFO BEGIN ----------\n";
+        $res = $search->execCommand(XS_CMD_DEBUG);
+        echo $res->buf;
+        echo "\n---------- SERVER INFO END ----------\n";
+        // thread pool
+        $res = $search->execCommand(XS_CMD_SEARCH_DRAW_TPOOL);
+        echo $res->buf;
+    } elseif (is_string($synonyms) && $synonyms !== 'stemmed') {
+        echo "列出\033[7m".$synonyms."\033[m的同义词：\n";
+        $synonyms = $search->getSynonyms($synonyms);
+        print_r($synonyms);
+    } elseif ($synonyms !== null) {
+        // list all
+        if ($limit === null) {
+            $offset = $limit1 = 0;
+        } elseif (($pos = strpos($limit, ',')) === false) {
+            $offset = 0;
+        } else {
+            $limit1 = intval(substr($limit, $pos + 1));
+            $offset = intval($limit);
+        }
 
-		$synonyms = $search->getAllSynonyms($limit1, $offset, $synonyms === 'stemmed');
-		if (count($synonyms) == 0) {
-			echo "暂无相关的同义词记录";
-			if ($offset != 0) {
-				echo "，反正总数不超过 $offset 个";
-			}
-			echo "。\n";
-		} else {
-			$i = $offset + 1;
-			printf("   %s %s\n%s\n", XSUtil::fixWidth('原词', 32), '同义词', XSUtil::fixWidth('', 56, '-'));
-			foreach ($synonyms as $raw => $list) {
-				printf("%4d. %s %s\n", $i++, XSUtil::fixWidth($raw, 29), implode(", ", $list));
-			}
-		}
-	} elseif ($terms !== null) {
-		$result = $search->terms($query);
-		echo "列出\033[7m" . $query . "\033[m的内部切分结果：\n";
-		print_r($result);
-	} elseif ($correct !== null) {
-		$result = $search->getCorrectedQuery($query);
-		if (count($result) === 0) {
-			echo "目前对\033[7m" . $query . "\033[m还没有更好的修正方案。\n";
-		} else {
-			echo "您可以试试找：\033[4m" . implode("\033[m \033[4m", $result) . "\033[m\n";
-		}
-	} elseif ($suggest !== null) {
-		$result = $search->getExpandedQuery($query, $limit1);
-		if (count($result) === 0) {
-			echo "目前对\033[7m" . $query . "\033[m还没有任何搜索建议。\n";
-		} else {
-			echo "展开\033[7m" . $query . "\033[m得到以下搜索建议：\n";
-			for ($i = 0; $i < count($result); $i++) {
-				printf("%d. %s\n", $i + 1, $result[$i]);
-			}
-		}
-	} elseif ($related !== null) {
-		$result = $search->getRelatedQuery($query, $limit1);
-		if (count($result) === 0) {
-			echo "目前还没有与\033[7m" . $query . "\033[m相关的搜索词。\n";
-		} else {
-			echo "与\033[7m" . $query . "\033[m相关的搜索词：\n";
-			for ($i = 0; $i < count($result); $i++) {
-				printf("%d. %s\n", $i + 1, $result[$i]);
-			}
-		}
-	} else {
-		// fuzzy search
-		if (XSUtil::getOpt(null, 'fuzzy') !== null) {
-			$search->setFuzzy();
-		}
-		$syn = XSUtil::getOpt(null, 'synonym');
-		if ($syn !== null) {
-			$search->setAutoSynonyms();
-			if ($syn !== true) {
-				$search->setSynonymScale(floatval($syn));
-			}
-		}
+        $synonyms = $search->getAllSynonyms($limit1, $offset, $synonyms === 'stemmed');
+        if (count($synonyms) == 0) {
+            echo '暂无相关的同义词记录';
+            if ($offset != 0) {
+                echo "，反正总数不超过 $offset 个";
+            }
+            echo "。\n";
+        } else {
+            $i = $offset + 1;
+            printf("   %s %s\n%s\n", XSUtil::fixWidth('原词', 32), '同义词', XSUtil::fixWidth('', 56, '-'));
+            foreach ($synonyms as $raw => $list) {
+                printf("%4d. %s %s\n", $i++, XSUtil::fixWidth($raw, 29), implode(', ', $list));
+            }
+        }
+    } elseif ($terms !== null) {
+        $result = $search->terms($query);
+        echo "列出\033[7m".$query."\033[m的内部切分结果：\n";
+        print_r($result);
+    } elseif ($correct !== null) {
+        $result = $search->getCorrectedQuery($query);
+        if (count($result) === 0) {
+            echo "目前对\033[7m".$query."\033[m还没有更好的修正方案。\n";
+        } else {
+            echo "您可以试试找：\033[4m".implode("\033[m \033[4m", $result)."\033[m\n";
+        }
+    } elseif ($suggest !== null) {
+        $result = $search->getExpandedQuery($query, $limit1);
+        if (count($result) === 0) {
+            echo "目前对\033[7m".$query."\033[m还没有任何搜索建议。\n";
+        } else {
+            echo "展开\033[7m".$query."\033[m得到以下搜索建议：\n";
+            for ($i = 0; $i < count($result); $i++) {
+                printf("%d. %s\n", $i + 1, $result[$i]);
+            }
+        }
+    } elseif ($related !== null) {
+        $result = $search->getRelatedQuery($query, $limit1);
+        if (count($result) === 0) {
+            echo "目前还没有与\033[7m".$query."\033[m相关的搜索词。\n";
+        } else {
+            echo "与\033[7m".$query."\033[m相关的搜索词：\n";
+            for ($i = 0; $i < count($result); $i++) {
+                printf("%d. %s\n", $i + 1, $result[$i]);
+            }
+        }
+    } else {
+        // fuzzy search
+        if (XSUtil::getOpt(null, 'fuzzy') !== null) {
+            $search->setFuzzy();
+        }
+        $syn = XSUtil::getOpt(null, 'synonym');
+        if ($syn !== null) {
+            $search->setAutoSynonyms();
+            if ($syn !== true) {
+                $search->setSynonymScale(floatval($syn));
+            }
+        }
 
-		if (($pos = strpos($limit, ',')) === false) {
-			$offset = 0;
-		} else {
-			$limit1 = intval(substr($limit, $pos + 1));
-			$offset = intval($limit);
-		}
+        if (($pos = strpos($limit, ',')) === false) {
+            $offset = 0;
+        } else {
+            $limit1 = intval(substr($limit, $pos + 1));
+            $offset = intval($limit);
+        }
 
-		// sort
-		if ($sort !== null) {
-			$fields = array();
-			$tmps = explode(',', $sort);
-			foreach ($tmps as $tmp) {
-				$tmp = trim($tmp);
-				if ($tmp === '') {
-					continue;
-				}
-				if (substr($tmp, 0, 1) === '~') {
-					$fields[substr($tmp, 1)] = false;
-				} else {
-					$fields[$tmp] = true;
-				}
-			}
-			$search->setMultiSort($fields);
-		}
+        // sort
+        if ($sort !== null) {
+            $fields = [];
+            $tmps = explode(',', $sort);
+            foreach ($tmps as $tmp) {
+                $tmp = trim($tmp);
+                if ($tmp === '') {
+                    continue;
+                }
+                if (substr($tmp, 0, 1) === '~') {
+                    $fields[substr($tmp, 1)] = false;
+                } else {
+                    $fields[$tmp] = true;
+                }
+            }
+            $search->setMultiSort($fields);
+        }
 
-		// special fields
-		$fid = $xs->getFieldId();
-		$ftitle = $xs->getFieldTitle();
-		$fbody = $xs->getFieldBody();
-		if ($fbody) {
-			$xs->getFieldBody()->cutlen = 100;
-		}
+        // special fields
+        $fid = $xs->getFieldId();
+        $ftitle = $xs->getFieldTitle();
+        $fbody = $xs->getFieldBody();
+        if ($fbody) {
+            $xs->getFieldBody()->cutlen = 100;
+        }
 
-		// add range
-		$ranges = array();
-		if (strpos($query, '..') !== false) {
-			$regex = '/(\S+?):(\S*?)\.\.(\S*)/';
-			if (preg_match_all($regex, $query, $matches) > 0) {
-				for ($i = 0; $i < count($matches[0]); $i++) {
-					$ranges[] = array($matches[1][$i],
-						$matches[2][$i] === '' ? null : $matches[2][$i],
-						$matches[3][$i] === '' ? null : $matches[3][$i]);
-					$query = str_replace($matches[0][$i], '', $query);
-				}
-			}
-		}
+        // add range
+        $ranges = [];
+        if (strpos($query, '..') !== false) {
+            $regex = '/(\S+?):(\S*?)\.\.(\S*)/';
+            if (preg_match_all($regex, $query, $matches) > 0) {
+                for ($i = 0; $i < count($matches[0]); $i++) {
+                    $ranges[] = [$matches[1][$i],
+                        $matches[2][$i] === '' ? null : $matches[2][$i],
+                        $matches[3][$i] === '' ? null : $matches[3][$i], ];
+                    $query = str_replace($matches[0][$i], '', $query);
+                }
+            }
+        }
 
-		// set query
-		$search->setQuery($query);
-		foreach ($ranges as $range) {
-			$search->addRange($range[0], $range[1], $range[2]);
-		}
+        // set query
+        $search->setQuery($query);
+        foreach ($ranges as $range) {
+            $search->addRange($range[0], $range[1], $range[2]);
+        }
 
-		// add weights
-		if ($weights !== null) {
-			foreach (explode(',', $weights) as $tmp) {
-				$tmp = explode(':', trim($tmp));
-				if (count($tmp) === 1) {
-					$search->addWeight(null, $tmp[0]);
-				} elseif (count($tmp) === 2) {
-					if (is_numeric($tmp[1])) {
-						$search->addWeight(null, $tmp[0], floatval($tmp[1]));
-					} else {
-						$search->addWeight($tmp[0], $tmp[1]);
-					}
-				} else {
-					$search->addWeight($tmp[0], $tmp[1], floatval($tmp[2]));
-				}
-			}
-		}
+        // add weights
+        if ($weights !== null) {
+            foreach (explode(',', $weights) as $tmp) {
+                $tmp = explode(':', trim($tmp));
+                if (count($tmp) === 1) {
+                    $search->addWeight(null, $tmp[0]);
+                } elseif (count($tmp) === 2) {
+                    if (is_numeric($tmp[1])) {
+                        $search->addWeight(null, $tmp[0], floatval($tmp[1]));
+                    } else {
+                        $search->addWeight($tmp[0], $tmp[1]);
+                    }
+                } else {
+                    $search->addWeight($tmp[0], $tmp[1], floatval($tmp[2]));
+                }
+            }
+        }
 
-		// cut off
-		if ($cut_off !== null) {
-			if (($pos = strpos($cut_off, ','))) {
-				$search->setCutOff(substr($cut_off, 0, $pos), substr($cut_off, $pos + 1));
-			} elseif (strpos($cut_off, '.') !== false) {
-				$search->setCutOff(0, $cut_off);
-			} else {
-				$search->setCutOff($cut_off);
-			}
-		}
+        // cut off
+        if ($cut_off !== null) {
+            if (($pos = strpos($cut_off, ','))) {
+                $search->setCutOff(substr($cut_off, 0, $pos), substr($cut_off, $pos + 1));
+            } elseif (strpos($cut_off, '.') !== false) {
+                $search->setCutOff(0, $cut_off);
+            } else {
+                $search->setCutOff($cut_off);
+            }
+        }
 
-		// preform search
-		$begin = microtime(true);
-		$result = $search->setLimit($limit1, $offset)->search();
-		$cost = microtime(true) - $begin;
-		$matched = $search->getLastCount();
-		$total = $search->getDbTotal();
+        // preform search
+        $begin = microtime(true);
+        $result = $search->setLimit($limit1, $offset)->search();
+        $cost = microtime(true) - $begin;
+        $matched = $search->getLastCount();
+        $total = $search->getDbTotal();
 
-		// show query?
-		if (XSUtil::getOpt(null, 'show-query') !== null) {
-			echo str_repeat("-", 20) . "\n";
-			echo "解析后的 QUERY 语句：" . $search->getQuery() . "\n";
-			echo str_repeat("-", 20) . "\n";
-		}
+        // show query?
+        if (XSUtil::getOpt(null, 'show-query') !== null) {
+            echo str_repeat('-', 20)."\n";
+            echo '解析后的 QUERY 语句：'.$search->getQuery()."\n";
+            echo str_repeat('-', 20)."\n";
+        }
 
-		// related & corrected
-		$correct = $search->getCorrectedQuery();
-		$related = $search->getRelatedQuery();
+        // related & corrected
+        $correct = $search->getCorrectedQuery();
+        $related = $search->getRelatedQuery();
 
-		// info
-		printf("在 %s 条数据中，大约有 %d 条包含 \033[7m%s\033[m ，第 %d-%d 条，用时：%.4f 秒。\n", number_format($total), $matched, $query, min($matched, $offset + 1), min($matched, $limit1 + $offset), $cost);
-		// correct
-		if (count($correct) > 0) {
-			echo "您是不是想找：\033[4m" . implode("\033[m \033[4m", $correct) . "\033[m\n";
-		}
-		// show result
-		foreach ($result as $doc) /* @var $doc XSDocument */ {
-			// body & title
-			$body = $title = '';
-			if ($ftitle !== false) {
-				$title = cliHighlight($doc->f($ftitle));
-			}
-			if ($fbody !== false) {
-				$body = cliHighlight($doc->f($fbody)) . "\n";
-			}
+        // info
+        printf("在 %s 条数据中，大约有 %d 条包含 \033[7m%s\033[m ，第 %d-%d 条，用时：%.4f 秒。\n", number_format($total), $matched, $query, min($matched, $offset + 1), min($matched, $limit1 + $offset), $cost);
+        // correct
+        if (count($correct) > 0) {
+            echo "您是不是想找：\033[4m".implode("\033[m \033[4m", $correct)."\033[m\n";
+        }
+        // show result
+        foreach ($result as $doc) /* @var $doc XSDocument */ {
+            // body & title
+            $body = $title = '';
+            if ($ftitle !== false) {
+                $title = cliHighlight($doc->f($ftitle));
+            }
+            if ($fbody !== false) {
+                $body = cliHighlight($doc->f($fbody))."\n";
+            }
 
-			// main fields
-			printf("\n%d. \033[4m%s#%s# [%d%%,%.2f]\033[m\n", $doc->rank(), $title, $doc->f($fid), $doc->percent(), $doc->weight());
-			echo $body;
+            // main fields
+            printf("\n%d. \033[4m%s#%s# [%d%%,%.2f]\033[m\n", $doc->rank(), $title, $doc->f($fid), $doc->percent(), $doc->weight());
+            echo $body;
 
-			// other fields
-			$line = '';
-			foreach ($xs->getAllFields() as $field) /* @var $field XSFieldMeta */ {
-				if ($field->isSpeical()) {
-					continue;
-				}
-				$tmp = ucfirst($field->name) . ':' . cliHighlight($doc->f($field));
-				if ((strlen($tmp) + strlen($line)) > 80) {
-					if (strlen($line) > 0) {
-						echo $line . "\n";
-						$line = '';
-					}
-					echo $tmp . "\n";
-				} else {
-					$line .= $tmp . ' ';
-				}
-			}
-			if (strlen($line) > 0) {
-				echo $line . "\n";
-			}
-		}
-		// related
-		if (count($related) > 0) {
-			echo "\n相关搜索：\033[4m" . implode("\033[m \033[4m", $related) . "\033[m\n";
-		}
-		echo "\n";
-	}
+            // other fields
+            $line = '';
+            foreach ($xs->getAllFields() as $field) /* @var $field XSFieldMeta */ {
+                if ($field->isSpeical()) {
+                    continue;
+                }
+                $tmp = ucfirst($field->name).':'.cliHighlight($doc->f($field));
+                if ((strlen($tmp) + strlen($line)) > 80) {
+                    if (strlen($line) > 0) {
+                        echo $line."\n";
+                        $line = '';
+                    }
+                    echo $tmp."\n";
+                } else {
+                    $line .= $tmp.' ';
+                }
+            }
+            if (strlen($line) > 0) {
+                echo $line."\n";
+            }
+        }
+        // related
+        if (count($related) > 0) {
+            echo "\n相关搜索：\033[4m".implode("\033[m \033[4m", $related)."\033[m\n";
+        }
+        echo "\n";
+    }
 } catch (XSException $e) {
-	// Exception
-	$start = dirname(dirname(__FILE__));
-	$relative = XSException::getRelPath($start);
-	$traceString = $e->getTraceAsString();
-	$traceString = str_replace(dirname(__FILE__) . '/', '', $traceString);
-	$traceString = str_replace($start . ($relative === '' ? '/' : ''), $relative, $traceString);
-	echo $e . "\n" . $traceString . "\n";
+    // Exception
+    $start = dirname(dirname(__FILE__));
+    $relative = XSException::getRelPath($start);
+    $traceString = $e->getTraceAsString();
+    $traceString = str_replace(dirname(__FILE__).'/', '', $traceString);
+    $traceString = str_replace($start.($relative === '' ? '/' : ''), $relative, $traceString);
+    echo $e."\n".$traceString."\n";
 }
 
 // local highlight function
 function cliHighlight($str)
 {
-	global $search;
-	$str = $search->highlight($str);
-	$str = preg_replace('#<em>(.+?)</em>#', "\033[7m\\1\033[m", $str) . ' ';
-	$str = strtr($str, array('<em>' => '', '</em>' => ''));
-	return $str;
+    global $search;
+    $str = $search->highlight($str);
+    $str = preg_replace('#<em>(.+?)</em>#', "\033[7m\\1\033[m", $str).' ';
+    $str = strtr($str, ['<em>' => '', '</em>' => '']);
+
+    return $str;
 }
