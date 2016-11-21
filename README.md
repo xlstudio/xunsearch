@@ -1,10 +1,11 @@
 Laravel 5 XunSearch
 ==============
 
+[![StyleCI](https://styleci.io/repos/73894884/shield?style=flat)](https://styleci.io/repos/73894884)
+[![Total Downloads](https://poser.pugx.org/xlstudio/xunsearch/downloads)](https://packagist.org/packages/xlstudio/xunsearch)
 [![Latest Stable Version](https://poser.pugx.org/xlstudio/xunsearch/v/stable.png)](https://packagist.org/packages/xlstudio/xunsearch)
 [![Latest Unstable Version](https://poser.pugx.org/xlstudio/xunsearch/v/unstable.png)](https://packagist.org/packages/xlstudio/xunsearch)
 [![License](https://poser.pugx.org/xlstudio/xunsearch/license.png)](https://packagist.org/packages/xlstudio/xunsearch)
-[![Total Downloads](https://poser.pugx.org/xlstudio/xunsearch/downloads)](https://packagist.org/packages/xlstudio/xunsearch)
 
 Laravel 5 package for full-text search over Eloquent models based on XunSearch.
 
