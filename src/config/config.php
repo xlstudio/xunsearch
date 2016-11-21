@@ -2,40 +2,40 @@
 
 return [
     //@see http://www.xunsearch.com/doc/php/guide/ini.guide
-    "project" => [
-        "project.name" => "demo",
-        "project.default_charset" => "utf-8",
-        "server.index" => "127.0.0.1:8383",
-        "server.search" => "127.0.0.1:8384",
+    'project' => [
+        'project.name'            => 'demo',
+        'project.default_charset' => 'utf-8',
+        'server.index'            => '127.0.0.1:8383',
+        'server.search'           => '127.0.0.1:8384',
         //remember change FIELD_LABEL_DEFAULT_SEARCH_PK value in Config.php
-        "primary_key" => [
-            "type" => "id"
+        'primary_key' => [
+            'type' => 'id',
         ],
         //remember change FIELD_LABEL_DEFAULT_CLASS_ID value in Config.php
-        "class_uid" => [
-            "index" => "both"
+        'class_uid' => [
+            'index' => 'both',
         ],
         //remember change FIELD_LABEL_DEFAULT_DB_PK value in Config.php
-        "id" => [
-            "type" => "numeric"
+        'id' => [
+            'type' => 'numeric',
         ],
-        "username" => [
-            "type" => "title"
+        'username' => [
+            'type' => 'title',
         ],
-        "email" => [
-            "index" => "both"
+        'email' => [
+            'index' => 'both',
         ],
-        "last_seen" => [
-            "type" => "numeric"
+        'last_seen' => [
+            'type' => 'numeric',
         ],
-        "role" => [
-            "index" => "both"
+        'role' => [
+            'index' => 'both',
         ],
-        "uri" => [
-            "index" => "both"
+        'uri' => [
+            'index' => 'both',
         ],
-        "action" => [
-            "index" => "both"
+        'action' => [
+            'index' => 'both',
         ],
     ],
     /*
@@ -64,18 +64,18 @@ return [
                     'last_seen' => ['type' => 'timestamp'],
                 ],
                 //primary_key name in DB
-                'primary_key' => 'id'
+                'primary_key' => 'id',
             ],
             \App\Models\Role::class => [
                 'fields' => [
-                    'role'
-                ]
+                    'role',
+                ],
             ],
             \App\Models\Action::class => [
                 'fields' => [
-                    'uri', 'action'
-                ]
-            ]
+                    'uri', 'action',
+                ],
+            ],
         ],
     ],
 

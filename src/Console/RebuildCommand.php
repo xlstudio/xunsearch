@@ -5,15 +5,15 @@ namespace Xlstudio\XunSearch\Console;
 use App;
 use Config;
 use Illuminate\Console\Command;
-use Xlstudio\XunSearch\Search;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\NullOutput;
+use Xlstudio\XunSearch\Search;
 
 /**
  * Class RebuildCommand
- * Rebuild search index
+ * Rebuild search index.
+ *
  * @author davin.bao
- * @package Xlstudio\XunSearch\Console
  */
 class RebuildCommand extends Command
 {
@@ -23,7 +23,7 @@ class RebuildCommand extends Command
     public function fire()
     {
         if (!$this->option('verbose')) {
-            $this->output = new NullOutput;
+            $this->output = new NullOutput();
         }
         //XunSearch 已经在平滑重建索引时清除了所有旧索引
 //        $this->call('search:clear');
@@ -38,19 +38,19 @@ class RebuildCommand extends Command
 
         $modelRepositories = Config::get('xunsearch.index.models');
         if (count($modelRepositories) > 0) {
-            foreach ($modelRepositories as $modelName=>$value) {
-                if(!class_exists($modelName)){
-                    $this->info('Not exist model: "' . $modelName . '"');
+            foreach ($modelRepositories as $modelName => $value) {
+                if (!class_exists($modelName)) {
+                    $this->info('Not exist model: "'.$modelName.'"');
                     continue;
                 }
                 $modelRepository = new $modelName();
-                $this->info('Creating index for model: "' . get_class($modelRepository) . '"');
+                $this->info('Creating index for model: "'.get_class($modelRepository).'"');
 
                 $all = $modelRepository->all();
 
                 $count = count($all);
                 //输出 Model 数量
-                echo $count . ' ';
+                echo $count.' ';
 
                 if ($count > 0) {
                     $progress = new ProgressBar($this->getOutput(), $count);
@@ -59,13 +59,11 @@ class RebuildCommand extends Command
                         $progress->advance();
                     }
                     $progress->finish();
-
                 } else {
                     $this->comment(' No available models found. ');
                 }
-
             }
-            $this->info(PHP_EOL . 'Operation is fully complete!');
+            $this->info(PHP_EOL.'Operation is fully complete!');
         } else {
             $this->error('No models found in config.php file..');
         }
@@ -75,6 +73,5 @@ class RebuildCommand extends Command
 
         //输出所有 Document 数量
         echo $search->search()->getDbTotal();
-
     }
 }
