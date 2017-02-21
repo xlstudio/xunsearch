@@ -17,7 +17,7 @@ class Xs extends \XS
      */
     public function __construct($config)
     {
-        self::setConfig($config);
+        $this->setConfig($config);
 
         $scheme = new \XSFieldScheme();
         foreach ($this->_config as $key => $value) {

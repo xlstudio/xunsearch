@@ -358,6 +358,11 @@ class XS extends XSComponent
         }
     }
 
+    public function setConfig($config)
+    {
+        $this->_config = $config;
+    }
+
     public function getConfig()
     {
         return $this->_config;
