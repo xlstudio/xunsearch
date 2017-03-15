@@ -123,7 +123,6 @@ class Search
         // Get base fields.
         $fields = $this->config->fields($model);
 
-
         // Add fields to document to be indexed (but not stored).
         foreach ($fields as $fieldName => $options) {
             //获取数据库中的值
