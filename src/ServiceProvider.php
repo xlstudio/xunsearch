@@ -36,14 +36,12 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             );
         });
 
-
         $this->app->singleton('search', function ($app) {
             return new Search(
                 $app['xunsearch.project'],
                 $app['xunsearch.models.config']
             );
         });
-
 
         $this->app->singleton('command.search.rebuild', function () {
             return new Console\RebuildCommand();
