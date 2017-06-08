@@ -16,7 +16,7 @@ Require this package in your composer.json and run composer update:
 ```json
 {
 	"require": {
-        "xlstudio/xunsearch": "dev-master"
+            "xlstudio/xunsearch": "dev-master"
 	}
 }
 ```
